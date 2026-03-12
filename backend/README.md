@@ -1,6 +1,6 @@
 # Retirement Investment Management Platform – Backend
 
-Spring Boot backend for the Retirement Investment Management Platform. Uses Java 17, Spring Security with JWT, Spring Data JPA, and H2 for development.
+Spring Boot backend for the Retirement Investment Management Platform. Uses Java 17, Spring Security with JWT, Spring Data JPA, H2 for development, and is ready to run in the cloud (Docker + cloud profile).
 
 ## Package layout
 
@@ -28,13 +28,54 @@ Spring Boot backend for the Retirement Investment Management Platform. Uses Java
   mvn spring-boot:run
   ```
 
-## Run
+## Run locally
 
 ```bash
 mvn spring-boot:run
 ```
 
 Server: `http://localhost:8080`
+
+## Run with Docker (backend + cloud profile)
+
+From the `backend` directory:
+
+```bash
+# Build image
+docker build -t retirement-platform-backend .
+
+# Run (set JWT_SECRET; PORT is optional, default 8080)
+docker run -p 8080:8080 -e JWT_SECRET=$(openssl rand -hex 32) retirement-platform-backend
+```
+
+For a cloud database (e.g. PostgreSQL), pass the datasource env vars:
+
+```bash
+docker run -p 8080:8080 \
+  -e JWT_SECRET=your-secret-min-32-chars \
+  -e SPRING_DATASOURCE_URL=jdbc:postgresql://host:5432/dbname \
+  -e SPRING_DATASOURCE_USERNAME=user \
+  -e SPRING_DATASOURCE_PASSWORD=pass \
+  retirement-platform-backend
+```
+
+## Deploy to the cloud
+
+The app uses the **cloud** profile when run in Docker (`SPRING_PROFILES_ACTIVE=cloud`). For cloud platforms:
+
+1. **Build** the Docker image (or use a buildpack / `mvn package`).
+2. **Set environment variables** in the platform:
+   - `JWT_SECRET` (required) – at least 32 bytes.
+   - `PORT` – often set by the platform (Heroku, Cloud Run, App Service, etc.).
+   - For a managed DB: `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`.
+3. **Optional:** `SPRING_JPA_HIBERNATE_DDL=update` (default in cloud profile).
+
+Examples:
+
+- **Google Cloud Run:** Push image to Artifact Registry or Container Registry, deploy with Cloud Run and set the env vars above.
+- **AWS (ECS / App Runner):** Deploy the image to ECR, run as a service with the same env vars.
+- **Azure App Service:** Deploy as a Linux container and configure Application Settings for the env vars.
+- **Heroku:** Use Heroku container registry or buildpack; set Config Vars for `JWT_SECRET` and `DATABASE_URL` (or `SPRING_DATASOURCE_*`).
 
 ## H2 console
 
