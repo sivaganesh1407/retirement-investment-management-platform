@@ -1,0 +1,9 @@
+#!/bin/sh
+# Minimal wrapper: use system Maven if available.
+# For a full wrapper that downloads Maven, run: mvn -N wrapper:wrapper
+if command -v mvn >/dev/null 2>&1; then
+  exec mvn "$@"
+else
+  echo "Maven not found. Install Maven or run from a machine with Maven: mvn -N wrapper:wrapper"
+  exit 1
+fi

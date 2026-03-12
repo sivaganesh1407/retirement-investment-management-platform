@@ -2,7 +2,7 @@ package com.financial.platform.controller;
 
 import com.financial.platform.model.Customer;
 import com.financial.platform.service.CustomerService;
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

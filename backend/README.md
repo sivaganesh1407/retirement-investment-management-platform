@@ -1,6 +1,6 @@
 # Retirement Investment Management Platform – Backend
 
-Spring Boot backend for the Retirement Investment Management Platform. Uses Java 17, Spring Security with JWT, Spring Data JPA, H2 for development, and is ready to run in the cloud (Docker + cloud profile).
+Spring Boot backend for the Retirement Investment Management Platform. Uses Java 11, Spring Security with JWT, Spring Data JPA, H2 for development, and is ready to run in the cloud (Docker + cloud profile).
 
 ## Package layout
 
@@ -15,26 +15,49 @@ Spring Boot backend for the Retirement Investment Management Platform. Uses Java
 
 ## Requirements
 
-- **Java 17**
+- **Java 11** or later (project is built and tested with Java 11)
 - Maven 3.6+
+
+**Check your Java version:** `java -version` and `mvn -v`. The project compiles with Java 11 (e.g. Amazon Corretto 11, Temurin 11, or OpenJDK 11).
 
 ## Configuration
 
 - **JWT_SECRET** (required): Environment variable for signing JWTs. Must be at least 32 bytes (e.g. `openssl rand -hex 32`). Never commit a real secret to version control.
 
-  Local run example:
+  **Easiest:** use the run script (sets JWT_SECRET automatically if missing):
+  ```bash
+  ./run.sh
+  ```
+  Or set it yourself and use Maven:
   ```bash
   export JWT_SECRET=$(openssl rand -hex 32)
-  mvn spring-boot:run
+  ./mvnw spring-boot:run
   ```
 
 ## Run locally
 
+**Option 1 – run script (recommended):** sets `JWT_SECRET` if not set, then starts the app.
+
+From the **project root** (retirement-investment-management-platform):
 ```bash
-mvn spring-boot:run
+cd backend
+./run.sh
+```
+If you're **already in the `backend` folder**, just run `./run.sh` (do not run `cd backend` again).
+
+**Option 2 – Maven directly:**
+
+```bash
+cd backend
+export JWT_SECRET=$(openssl rand -hex 32)
+./mvnw spring-boot:run
+# or: mvn spring-boot:run
 ```
 
 Server: `http://localhost:8080`
+
+- **`.java-version`** is set to `11` so tools (SDKMAN, asdf, IDEs) can pick the right JDK.
+- **`./mvnw`** uses system Maven if present. For a full wrapper that downloads Maven, run once: `mvn -N wrapper:wrapper`.
 
 ## Run with Docker (backend + cloud profile)
 
@@ -77,11 +100,23 @@ Examples:
 - **Azure App Service:** Deploy as a Linux container and configure Application Settings for the env vars.
 - **Heroku:** Use Heroku container registry or buildpack; set Config Vars for `JWT_SECRET` and `DATABASE_URL` (or `SPRING_DATASOURCE_*`).
 
+## Health check
+
+For monitoring and cloud readiness, the app exposes:
+
+- **`GET /actuator/health`** – returns `{"status":"UP"}` (no auth). Use for load balancers and container health checks.
+- **`GET /actuator/info`** – app info (no auth).
+
 ## H2 console
 
 - URL: `http://localhost:8080/h2-console`
 - JDBC URL: `jdbc:h2:mem:financial_platform`
 - User: `sa`, Password: (empty)
+
+## API documentation (Swagger)
+
+- **Swagger UI:** `http://localhost:8080/swagger-ui.html` (no auth to view; use "Authorize" with a JWT to try protected endpoints).
+- **OpenAPI JSON:** `http://localhost:8080/v3/api-docs`
 
 ## API overview
 
@@ -99,7 +134,9 @@ Examples:
 ### Portfolio (JWT required)
 
 - `POST /portfolio` – Create portfolio (body: customerId, portfolioName).
-- `GET /portfolio/{customerId}` – List portfolios for customer.
+- `GET /portfolio/customer/{customerId}` – List portfolios for customer.
+- `GET /portfolio/{portfolioId}/investments` – List investments in a portfolio.
+- `POST /portfolio/{portfolioId}/investments` – Add investment (body: assetName, assetType, amount, purchaseDate).
 
 ### Retirement (JWT required)
 
@@ -114,3 +151,117 @@ Authorization: Bearer <token>
 ```
 
 Obtain the token from `POST /auth/register` or `POST /auth/login`.
+
+---
+
+## How to test
+
+### 1. Start the backend
+
+```bash
+cd backend
+./run.sh
+```
+
+Or with explicit JWT_SECRET: `export JWT_SECRET=$(openssl rand -hex 32)` then `./mvnw spring-boot:run`.
+
+Wait until you see something like `Started FinancialPlatformApplication`. Base URL: `http://localhost:8080`. Optional: `curl -s http://localhost:8080/actuator/health` should return `{"status":"UP"}`.
+
+### 2. Register a user (get JWT)
+
+```bash
+curl -s -X POST http://localhost:8080/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Test User","email":"test@example.com","password":"password123","role":"CUSTOMER"}' | jq .
+```
+
+Copy the `token` from the response (or the whole response if you don’t have `jq`).
+
+### 3. Login (alternative way to get JWT)
+
+```bash
+curl -s -X POST http://localhost:8080/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"password123"}' | jq .
+```
+
+Copy the `token` value.
+
+### 4. Call protected APIs with the token
+
+Set your token in a variable (replace with the actual token):
+
+```bash
+TOKEN="<paste-your-token-here>"
+```
+
+**Create a customer**
+
+```bash
+curl -s -X POST http://localhost:8080/customers \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"name":"Jane Doe","email":"jane@example.com","retirementGoal":500000,"riskProfile":"MODERATE"}' | jq .
+```
+
+Note the customer `id` from the response (e.g. `1`).
+
+**List customers**
+
+```bash
+curl -s http://localhost:8080/customers -H "Authorization: Bearer $TOKEN" | jq .
+```
+
+**Create a portfolio** (use the customer id from above, e.g. `1`)
+
+```bash
+curl -s -X POST http://localhost:8080/portfolio \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"customerId":1,"portfolioName":"My 401k"}' | jq .
+```
+
+**Get portfolios for a customer**
+
+```bash
+curl -s "http://localhost:8080/portfolio/customer/1" -H "Authorization: Bearer $TOKEN" | jq .
+```
+
+**Add an investment** (use a portfolio id from the list above, e.g. `1`)
+
+```bash
+curl -s -X POST http://localhost:8080/portfolio/1/investments \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"assetName":"S&P 500 ETF","assetType":"ETF","amount":10000,"purchaseDate":"2024-01-15"}' | jq .
+```
+
+**Get investments in a portfolio**
+
+```bash
+curl -s "http://localhost:8080/portfolio/1/investments" -H "Authorization: Bearer $TOKEN" | jq .
+```
+
+**Get retirement projection**
+
+```bash
+curl -s "http://localhost:8080/retirement/projection/1" -H "Authorization: Bearer $TOKEN" | jq .
+```
+
+### 5. Test without `jq`
+
+Omit `| jq .` to see raw JSON, for example:
+
+```bash
+curl -s -X POST http://localhost:8080/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Test User","email":"test2@example.com","password":"password123"}'
+```
+
+### 6. Run automated tests (Maven)
+
+```bash
+cd backend
+export JWT_SECRET=$(openssl rand -hex 32)
+./mvnw test
+```

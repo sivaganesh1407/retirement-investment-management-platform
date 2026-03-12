@@ -1,6 +1,6 @@
 package com.financial.platform.model.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 
 /**
  * DTO for login (email + password).

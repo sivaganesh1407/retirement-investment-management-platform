@@ -1,5 +1,5 @@
-# Build stage (Maven + JDK 17)
-FROM maven:3.9-eclipse-temurin-17-alpine AS build
+# Build stage (Maven + JDK 11)
+FROM maven:3.9-eclipse-temurin-11-alpine AS build
 WORKDIR /app
 
 # Copy pom and download dependencies (cached unless pom changes)
@@ -11,7 +11,7 @@ COPY src ./src
 RUN mvn package -DskipTests -B
 
 # Run stage
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:11-jre-alpine
 WORKDIR /app
 
 # Create non-root user

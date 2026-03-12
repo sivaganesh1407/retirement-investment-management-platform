@@ -7,7 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import jakarta.annotation.PostConstruct;
+import javax.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 

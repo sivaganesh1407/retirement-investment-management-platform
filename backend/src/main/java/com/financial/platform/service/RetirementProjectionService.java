@@ -67,10 +67,13 @@ public class RetirementProjectionService {
         if (riskProfile == null) {
             return GROWTH_MODERATE;
         }
-        return switch (riskProfile.toUpperCase()) {
-            case "CONSERVATIVE" -> GROWTH_CONSERVATIVE;
-            case "AGGRESSIVE" -> GROWTH_AGGRESSIVE;
-            default -> GROWTH_MODERATE;
-        };
+        switch (riskProfile.toUpperCase()) {
+            case "CONSERVATIVE":
+                return GROWTH_CONSERVATIVE;
+            case "AGGRESSIVE":
+                return GROWTH_AGGRESSIVE;
+            default:
+                return GROWTH_MODERATE;
+        }
     }
 }
