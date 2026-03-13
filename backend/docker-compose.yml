@@ -1,0 +1,39 @@
+# Run the backend API in Docker (cloud profile, H2 in-memory by default).
+# Set JWT_SECRET before running, e.g.:
+#   export JWT_SECRET=$(openssl rand -hex 32)
+#   docker compose up -d
+# Or copy .env.example to .env and set JWT_SECRET there, then: docker compose up -d
+
+services:
+  backend:
+    build: .
+    image: retirement-platform-backend:latest
+    container_name: retirement-platform-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+      - SPRING_PROFILES_ACTIVE=cloud
+      - PORT=8080
+    # Optional: use PostgreSQL instead of H2 (uncomment and run postgres service)
+    # - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/financial_platform
+    # - SPRING_DATASOURCE_USERNAME=app
+    # - SPRING_DATASOURCE_PASSWORD=app
+    # depends_on:
+    #   - postgres
+
+  # Optional PostgreSQL for local cloud-like testing (uncomment to use)
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: retirement-platform-db
+  #   environment:
+  #     POSTGRES_DB: financial_platform
+  #     POSTGRES_USER: app
+  #     POSTGRES_PASSWORD: app
+  #   ports:
+  #     - "5432:5432"
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U app -d financial_platform"]
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 5

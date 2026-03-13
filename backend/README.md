@@ -61,7 +61,19 @@ Server: `http://localhost:8080`
 
 ## Run with Docker (backend + cloud profile)
 
-From the `backend` directory:
+From the `backend` directory.
+
+**Option 1 – Docker Compose (recommended):**
+
+```bash
+# Set JWT_SECRET (required)
+export JWT_SECRET=$(openssl rand -hex 32)
+docker compose up -d
+```
+
+Or copy `.env.example` to `.env`, set `JWT_SECRET` there, then run `docker compose up -d`. The API will be at `http://localhost:8080`. Stop with `docker compose down`.
+
+**Option 2 – Build and run with docker only:**
 
 ```bash
 # Build image
@@ -71,7 +83,7 @@ docker build -t retirement-platform-backend .
 docker run -p 8080:8080 -e JWT_SECRET=$(openssl rand -hex 32) retirement-platform-backend
 ```
 
-For a cloud database (e.g. PostgreSQL), pass the datasource env vars:
+**With a cloud database (e.g. PostgreSQL):** pass the datasource env vars in `docker run` or in your `docker-compose.yml` / `.env`:
 
 ```bash
 docker run -p 8080:8080 \

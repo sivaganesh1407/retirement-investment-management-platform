@@ -25,3 +25,7 @@ replay_pid*
 
 # Maven
 backend/target/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
