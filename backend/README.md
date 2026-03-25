@@ -54,7 +54,7 @@ export JWT_SECRET=$(openssl rand -hex 32)
 # or: mvn spring-boot:run
 ```
 
-Server: `http://localhost:8080`
+Server: `http://localhost:8081`
 
 - **`.java-version`** is set to `11` so tools (SDKMAN, asdf, IDEs) can pick the right JDK.
 - **`./mvnw`** uses system Maven if present. For a full wrapper that downloads Maven, run once: `mvn -N wrapper:wrapper`.
@@ -71,7 +71,7 @@ export JWT_SECRET=$(openssl rand -hex 32)
 docker compose up -d
 ```
 
-Or copy `.env.example` to `.env`, set `JWT_SECRET` there, then run `docker compose up -d`. The API will be at `http://localhost:8080`. Stop with `docker compose down`.
+Or copy `.env.example` to `.env`, set `JWT_SECRET` there, then run `docker compose up -d`. The API will be at `http://localhost:8081`. Stop with `docker compose down`.
 
 **Option 2 – Build and run with docker only:**
 
@@ -79,14 +79,14 @@ Or copy `.env.example` to `.env`, set `JWT_SECRET` there, then run `docker compo
 # Build image
 docker build -t retirement-platform-backend .
 
-# Run (set JWT_SECRET; PORT is optional, default 8080)
-docker run -p 8080:8080 -e JWT_SECRET=$(openssl rand -hex 32) retirement-platform-backend
+# Run (set JWT_SECRET; PORT is optional, default 8081)
+docker run -p 8081:8081 -e JWT_SECRET=$(openssl rand -hex 32) retirement-platform-backend
 ```
 
 **With a cloud database (e.g. PostgreSQL):** pass the datasource env vars in `docker run` or in your `docker-compose.yml` / `.env`:
 
 ```bash
-docker run -p 8080:8080 \
+docker run -p 8081:8081 \
   -e JWT_SECRET=your-secret-min-32-chars \
   -e SPRING_DATASOURCE_URL=jdbc:postgresql://host:5432/dbname \
   -e SPRING_DATASOURCE_USERNAME=user \
@@ -121,14 +121,14 @@ For monitoring and cloud readiness, the app exposes:
 
 ## H2 console
 
-- URL: `http://localhost:8080/h2-console`
+- URL: `http://localhost:8081/h2-console`
 - JDBC URL: `jdbc:h2:mem:financial_platform`
 - User: `sa`, Password: (empty)
 
 ## API documentation (Swagger)
 
-- **Swagger UI:** `http://localhost:8080/swagger-ui.html` (no auth to view; use "Authorize" with a JWT to try protected endpoints).
-- **OpenAPI JSON:** `http://localhost:8080/v3/api-docs`
+- **Swagger UI:** `http://localhost:8081/swagger-ui.html` (no auth to view; use "Authorize" with a JWT to try protected endpoints).
+- **OpenAPI JSON:** `http://localhost:8081/v3/api-docs`
 
 ## API overview
 
@@ -177,12 +177,12 @@ cd backend
 
 Or with explicit JWT_SECRET: `export JWT_SECRET=$(openssl rand -hex 32)` then `./mvnw spring-boot:run`.
 
-Wait until you see something like `Started FinancialPlatformApplication`. Base URL: `http://localhost:8080`. Optional: `curl -s http://localhost:8080/actuator/health` should return `{"status":"UP"}`.
+Wait until you see something like `Started FinancialPlatformApplication`. Base URL: `http://localhost:8081`. Optional: `curl -s http://localhost:8081/actuator/health` should return `{"status":"UP"}`.
 
 ### 2. Register a user (get JWT)
 
 ```bash
-curl -s -X POST http://localhost:8080/auth/register \
+curl -s -X POST http://localhost:8081/auth/register \
   -H "Content-Type: application/json" \
   -d '{"name":"Test User","email":"test@example.com","password":"password123","role":"CUSTOMER"}' | jq .
 ```
@@ -192,7 +192,7 @@ Copy the `token` from the response (or the whole response if you don’t have `j
 ### 3. Login (alternative way to get JWT)
 
 ```bash
-curl -s -X POST http://localhost:8080/auth/login \
+curl -s -X POST http://localhost:8081/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"password123"}' | jq .
 ```
@@ -210,7 +210,7 @@ TOKEN="<paste-your-token-here>"
 **Create a customer**
 
 ```bash
-curl -s -X POST http://localhost:8080/customers \
+curl -s -X POST http://localhost:8081/customers \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d '{"name":"Jane Doe","email":"jane@example.com","retirementGoal":500000,"riskProfile":"MODERATE"}' | jq .
@@ -221,13 +221,13 @@ Note the customer `id` from the response (e.g. `1`).
 **List customers**
 
 ```bash
-curl -s http://localhost:8080/customers -H "Authorization: Bearer $TOKEN" | jq .
+curl -s http://localhost:8081/customers -H "Authorization: Bearer $TOKEN" | jq .
 ```
 
 **Create a portfolio** (use the customer id from above, e.g. `1`)
 
 ```bash
-curl -s -X POST http://localhost:8080/portfolio \
+curl -s -X POST http://localhost:8081/portfolio \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d '{"customerId":1,"portfolioName":"My 401k"}' | jq .
@@ -236,13 +236,13 @@ curl -s -X POST http://localhost:8080/portfolio \
 **Get portfolios for a customer**
 
 ```bash
-curl -s "http://localhost:8080/portfolio/customer/1" -H "Authorization: Bearer $TOKEN" | jq .
+curl -s "http://localhost:8081/portfolio/customer/1" -H "Authorization: Bearer $TOKEN" | jq .
 ```
 
 **Add an investment** (use a portfolio id from the list above, e.g. `1`)
 
 ```bash
-curl -s -X POST http://localhost:8080/portfolio/1/investments \
+curl -s -X POST http://localhost:8081/portfolio/1/investments \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d '{"assetName":"S&P 500 ETF","assetType":"ETF","amount":10000,"purchaseDate":"2024-01-15"}' | jq .
@@ -251,13 +251,13 @@ curl -s -X POST http://localhost:8080/portfolio/1/investments \
 **Get investments in a portfolio**
 
 ```bash
-curl -s "http://localhost:8080/portfolio/1/investments" -H "Authorization: Bearer $TOKEN" | jq .
+curl -s "http://localhost:8081/portfolio/1/investments" -H "Authorization: Bearer $TOKEN" | jq .
 ```
 
 **Get retirement projection**
 
 ```bash
-curl -s "http://localhost:8080/retirement/projection/1" -H "Authorization: Bearer $TOKEN" | jq .
+curl -s "http://localhost:8081/retirement/projection/1" -H "Authorization: Bearer $TOKEN" | jq .
 ```
 
 ### 5. Test without `jq`
@@ -265,7 +265,7 @@ curl -s "http://localhost:8080/retirement/projection/1" -H "Authorization: Beare
 Omit `| jq .` to see raw JSON, for example:
 
 ```bash
-curl -s -X POST http://localhost:8080/auth/register \
+curl -s -X POST http://localhost:8081/auth/register \
   -H "Content-Type: application/json" \
   -d '{"name":"Test User","email":"test2@example.com","password":"password123"}'
 ```

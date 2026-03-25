@@ -5,7 +5,7 @@ React (Vite) frontend for the Retirement Investment Management Platform. Login, 
 ## Requirements
 
 - Node.js 18+
-- Backend running at `http://localhost:8080` (or set `VITE_API_URL`)
+- Backend running at `http://localhost:8081` (or set `VITE_API_URL`)
 
 ## Run
 
@@ -14,7 +14,7 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173). Use **Register** to create an account, then **Login**. The backend must be running and CORS is configured for `localhost:5173`.
+Open [http://localhost:3000](http://localhost:3000). Use **Register** to create an account, then **Login**. The backend must be running on port **8081**; CORS allows `localhost:3000`.
 
 ## Build
 

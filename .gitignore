@@ -29,3 +29,16 @@ backend/target/
 # Frontend
 frontend/node_modules/
 frontend/dist/
+
+# Secrets and local environment (never commit real values)
+.env
+.env.local
+.env.*.local
+
+# Root-level npm auth (tokens); frontend/.npmrc pins the public registry and may be committed
+/.npmrc
+
+# Keys and keystores
+*.pem
+*.p12
+*.jks

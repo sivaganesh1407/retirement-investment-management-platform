@@ -22,8 +22,8 @@ COPY --from=build /app/target/*.jar app.jar
 
 # Set cloud profile by default when running in container; override with env
 ENV SPRING_PROFILES_ACTIVE=cloud
-ENV PORT=8080
-EXPOSE 8080
+ENV PORT=8081
+EXPOSE 8081
 
 # JWT_SECRET and optionally SPRING_DATASOURCE_* must be set at runtime
 ENTRYPOINT ["sh", "-c", "java -Dserver.port=${PORT} -jar app.jar"]

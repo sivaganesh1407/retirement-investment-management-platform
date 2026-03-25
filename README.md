@@ -1,5 +1,7 @@
 # Retirement Investment Management Platform
 
+**Disclaimer:** This is an independent, educational sample project. It is not affiliated with, endorsed by, or produced for any employer or commercial entity. Use at your own risk; it is not financial or legal advice.
+
 Secure financial services platform for retirement planning, investment portfolio management, and customer financial workflows.
 
 ## Overview
@@ -17,7 +19,7 @@ Secure financial services platform for retirement planning, investment portfolio
    ```
 
    Or with Docker: `export JWT_SECRET=$(openssl rand -hex 32)` then `docker compose up -d`.  
-   Wait until the API is up (e.g. [http://localhost:8080/actuator/health](http://localhost:8080/actuator/health)).
+   Wait until the API is up (e.g. [http://localhost:8081/actuator/health](http://localhost:8081/actuator/health)).
 
 2. **Start the frontend** (new terminal):
 
@@ -27,9 +29,11 @@ Secure financial services platform for retirement planning, investment portfolio
    npm run dev
    ```
 
-3. **Open:** [http://localhost:5173](http://localhost:5173) — register or login, then use the app.
+   The frontend directory includes `.npmrc` with `registry=https://registry.npmjs.org/` so dependencies resolve from the public npm registry only (no private registry or auth required for these packages).
 
-**Backend only:** API at [http://localhost:8080](http://localhost:8080), docs at [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html).
+3. **Open:** [http://localhost:3000](http://localhost:3000) — register or login, then use the app.
+
+**Backend only:** API at [http://localhost:8081](http://localhost:8081), docs at [http://localhost:8081/swagger-ui.html](http://localhost:8081/swagger-ui.html).
 
 ## Project structure
 
@@ -51,7 +55,7 @@ retirement-investment-management-platform/
 
 ## Features
 
-- **Frontend:** React app — login/register, manage customers, portfolios, investments; view retirement projection. CORS enabled for `localhost:5173` and `3000`.
+- **Frontend:** React app — login/register, manage customers, portfolios, investments; view retirement projection. Dev server: `localhost:3000`; API: `localhost:8081`. CORS allows those origins (and `5173` if you change the Vite port).
 - **Backend:** JWT auth; customers, portfolios, investments, retirement projection APIs; Actuator health/info; Swagger at `/swagger-ui.html`; Docker and `cloud` profile.
 
 See [backend/README.md](backend/README.md) for API reference and [frontend/README.md](frontend/README.md) for frontend run/build.

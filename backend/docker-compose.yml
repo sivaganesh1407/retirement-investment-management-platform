@@ -10,11 +10,11 @@ services:
     image: retirement-platform-backend:latest
     container_name: retirement-platform-backend
     ports:
-      - "8080:8080"
+      - "8081:8081"
     environment:
       - JWT_SECRET=${JWT_SECRET}
       - SPRING_PROFILES_ACTIVE=cloud
-      - PORT=8080
+      - PORT=8081
     # Optional: use PostgreSQL instead of H2 (uncomment and run postgres service)
     # - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/financial_platform
     # - SPRING_DATASOURCE_USERNAME=app
